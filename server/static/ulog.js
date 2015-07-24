@@ -4,7 +4,7 @@ var active_tab;
 var debug_websocket = false;
 var debug_js = true;
 var debug_all = true;
-var t;
+var table;
 var ws;
 var JsonData;   
 /////////////////////////////////////////////////////////////////////
@@ -24,22 +24,6 @@ function show_server_msg(message, show) {
     if (show)
     {   
         console.log(message);        
-    }
-}
-
-function console_response_msg(message, show) {
-    if(show){
-        dbg(message,true);
-        selected_chan = $("#select-chan").val();
-        chan = message['FROM'];
-        console.log(message['MSG'])
-        //$("#console").html($("#console").text() + chan + "> " + "cmd [" + message['MSG'][1] + "]: " + message['MSG'][2].data + '\n');
-        if (selected_chan === chan || selected_chan == 'All')
-        {
-            $("#console").html($("#console").text() + chan + "> " + JSON.stringify(message['MSG']['data']) + '\n');
-            var psconsole = $('#console');
-            psconsole.scrollTop(psconsole[0].scrollHeight - psconsole.height());
-        }
     }
 }
 
@@ -70,9 +54,6 @@ function set_object_value(id, val){
     }
 }
 
-function parse_message(message_text){
-    var temp;
-}
 ///////////////////////////////////////////////////////////////////////
 // WEBSOCKETS FUNCTIONS
 //MessageHandler
@@ -106,9 +87,10 @@ function open_websocket(hostname, hostport, hosturl) {
 }
 
 function server_message_handler(data){
+    
     try {
         JsonData = JSON.parse(data);
-        t.row.add( [
+        table.row.add( [
             JsonData.time,            
             JsonData.name,
             JsonData.level,
@@ -141,5 +123,43 @@ function connect_to_websocket_host(){
 $(document).ready(function() {
     dbg('Document ready', true);
     connect_to_websocket_host();
-    t = $('#example').DataTable();
+    
+    $('#example tfoot th').each( function () {
+        var title = $('#example thead th').eq( $(this).index() ).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+
+    table = $('#example').DataTable({
+        dom: 'C<"clear">lfrtip',
+        "colVis": {
+            "buttonText": "Change columns"
+        },
+        "order": [[ 0, "desc" ]],
+        "scrollY": "500px",
+        "autoWidth": false,
+        "paging": false,
+        "columnDefs": [
+             { "width": "75%", "targets": 6 }
+             ]
+    } );
+
+    // table.column( 0 ).visible( false );
+    // table.column( 3 ).visible( false );
+    // table.column( 4 ).visible( false );
+    table.column( 7 ).visible( false );
+    table.column( 8 ).visible( false );
+    table.columns.adjust().draw( false );
+
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change', function () {
+            that
+                .search( this.value )
+                .draw();
+        } );
+    } );
+
+    
 });

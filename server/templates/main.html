@@ -16,54 +16,62 @@
   <!-- DataTables -->
   <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.js"></script>
   <script src="static/ulog.js"></script>
-
 </head>
 
 <body>
-    <div data-role="page" id="page1">
 
-        <div data-role="header" style="overflow:hidden;" data-theme="b">
-            <h1 id="headeer_status">uLogger</h1>
-            <a class="ui-btn-right" id="live" data-theme="a">OFFLINE</a>
-        </div>
-        
-        <div data-role="page" id="page_hydro"> 
+  <div data-role="page" id="page1">
 
-            <div id="hostname" value="localhost"></div>
-            <div id="hostport" value="8888"></div>
-            <div id="hosturl" value="log"></div>
-        </div>
-        <table id="example" class="display" cellspacing="10" width="100%">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Loger name</th>
-                    <th>Level</th>
-                    <th>Line #</th>
-                    <th>Filename</th>
-                    <th>Funcname</th>
-                    <th>Msg</th>
-                    <th>Hostname</th>                
-                    <th>Username</th>
-                </tr>
-            </thead>
+    <div data-role="header" style="overflow:hidden;" data-theme="b">
 
-            <tfoot>
-                <tr>
-                    <th>Time</th>
-                    <th>Loger name</th>
-                    <th>Level</th>
-                    <th>Line #</th>
-                    <th>Filename</th>
-                    <th>Funcname</th>
-                    <th>Msg</th>
-                    <th>Hostname</th>                
-                    <th>Username</th>
-                </tr>
-            </tfoot>
-        </table>
+     <div data-role="controlgroup" data-type="horizontal" class="ui-mini ui-btn-left">
+        <a href="#" class="ui-btn ui-btn-icon-right ui-icon-gear">Settings</a>
+        <a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-u">Pause</a>
+    </div>
+      <h1 id="headeer_status">uLogger</h1>
+      <a class="ui-btn-right" id="live" data-theme="a">OFFLINE</a>            
+    </div>
+    <div role="main" class="ui-content">    
 
+      <div data-role="page" id="main_page"> 
+        <div id="hostname" value="{{host_ip}}"></div>
+        <div id="hostport" value="{{host_port}}"></div>
+        <div id="hosturl"  value="{{log_url}}"></div>
+      </div>
 
-    </body>
+      <table id="example" class="display" cellspacing="0" width="100%">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Loger name</th>
+            <th>Level</th>
+            <th>Line #</th>
+            <th>Filename</th>
+            <th>Funcname</th>
+            <th>Msg</th>
+            <th>Hostname</th>                
+            <th>Username</th>
+          </tr>
+        </thead>
 
-    </html>
+        <tfoot>
+          <tr>
+            <th>Time</th>
+            <th>Loger name</th>
+            <th>Level</th>
+            <th>Line #</th>
+            <th>Filename</th>
+            <th>Funcname</th>
+            <th>Msg</th>
+            <th>Hostname</th>                
+            <th>Username</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div data-role="footer">...</div>
+
+  </body>
+
+  </html>

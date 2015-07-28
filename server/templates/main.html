@@ -20,25 +20,19 @@
 
 <body>
 
-  <div data-role="page" id="page1">
-
     <div data-role="header" style="overflow:hidden;" data-theme="b">
 
-     <div data-role="controlgroup" data-type="horizontal" class="ui-mini ui-btn-left">
-        <a href="#" class="ui-btn ui-btn-icon-right ui-icon-gear">Settings</a>
-        <a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-u">Pause</a>
-    </div>
+       <div data-role="controlgroup" data-type="horizontal" class="ui-mini ui-btn-left">
+        <a href="#" class="ui-btn ui-btn-icon-right ui-icon-gear">Settings</a>
+        <a href="#" id="button_run_stop" class="ui-btn ui-btn-icon-right ui-icon-arrow-r">Run</a>
+        <a href="#" id="button_clear" class="ui-btn ui-btn-icon-right ui-icon-delete">Clear</a>
+       </div>
+
       <h1 id="headeer_status">uLogger</h1>
       <a class="ui-btn-right" id="live" data-theme="a">OFFLINE</a>            
     </div>
-    <div role="main" class="ui-content">    
-
-      <div data-role="page" id="main_page"> 
-        <div id="hostname" value="{{host_ip}}"></div>
-        <div id="hostport" value="{{host_port}}"></div>
-        <div id="hosturl"  value="{{log_url}}"></div>
-      </div>
-
+    
+    <div class="ui-body ui-body-a ui-corner-all">
       <table id="example" class="display" cellspacing="0" width="100%">
         <thead>
           <tr>
@@ -73,5 +67,7 @@
     <div data-role="footer">...</div>
 
   </body>
-
+  <div id="hostname" value="{{host_ip}}"></div>
+  <div id="hostport" value="{{host_port}}"></div>
+  <div id="hosturl"  value="{{log_url}}"></div>
   </html>

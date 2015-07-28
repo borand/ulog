@@ -126,7 +126,7 @@ $(document).ready(function() {
     
     $('#example tfoot th').each( function () {
         var title = $('#example thead th').eq( $(this).index() ).text();
-        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+        $(this).html( '<input type="text" placeholder="'+title+'" />' );
     } );
 
     table = $('#example').DataTable({
@@ -160,6 +160,14 @@ $(document).ready(function() {
                 .draw();
         } );
     } );
+
+    $( "#button_clear" ).click(function() {
+    table.clear().draw();
+    });
+
+    $( "#button_run_stop" ).click(function() {
+    table.clear().draw();
+    });
 
     
 });

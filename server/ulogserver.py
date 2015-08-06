@@ -1,4 +1,4 @@
-"""uLogger.py -
+"""ulogserver.py -
 
 Main webserver for ulogserver
 
@@ -22,6 +22,7 @@ import tornadoredis
 import os
 import re
 import logbook
+import simplejson
 
 from docopt import docopt
 
@@ -52,6 +53,21 @@ log_url       = "log"
 
 R = Redis()
 
+def websocket_processing(msg):    
+    #log.debug("websocket_processing(msg = {0})".format(msg))
+    
+    try:
+        data = simplejson.loads(msg)
+        cmd = data.get('cmd',None)
+
+        if cmd == "pub":
+        	log.debug("pub(param = {0})".format(data['param']))
+            #params = simplejson.loads(data['param'])
+        	R.publish(data['param']['chan'], data['param']['msg'])
+    except:
+    	pass
+        
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self):        
         self.render("main.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
@@ -80,7 +96,7 @@ class MessageHandler(tornado.websocket.WebSocketHandler):
     #    return parsed_origin.netloc.endswith(".mydomain.com")
 
     def open(self, chan):
-        # print("MessageHandler.open {0}".format(chan))
+        log.debug("ulogserver:   MessageHandler.open(chan={0})".format(chan))
         self.sub_channel = chan
         self.listen()
 
@@ -93,12 +109,14 @@ class MessageHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, msg):
         #log.debug(type(msg))
+        
         if isinstance(msg,unicode):
-            log.debug(msg)
+            log.debug(msg)            
+            websocket_processing(msg)
         else:
             if msg.kind == 'message':
                 #log.debug(str(simplejson.loads(msg.body)))
-                self.write_message(str(msg.body))
+                self.write_message(simplejson.dumps(msg.body))                
             if msg.kind == 'disconnect':
                 # Do not try to reconnect, just send a message back
                 # to the client and close the client connection
@@ -107,8 +125,9 @@ class MessageHandler(tornado.websocket.WebSocketHandler):
                 self.close()
 
     def on_close(self):
+        log.debug("on_close()")
         if self.client.subscribed:
-            self.client.unsubscribe(redis_pubsub_channel)
+            self.client.unsubscribe(self.sub_channel)
             self.client.disconnect()
 
 class Application(tornado.web.Application):
@@ -136,5 +155,6 @@ if __name__ == '__main__':
 
     app = Application()
     app.listen(host_port)
+    log.level = logbook.DEBUG;
     print('uLogger is running at %s:%d\nQuit the demo with CONTROL-C' % (get_host_ip(), host_port))
     tornado.ioloop.IOLoop.instance().start()

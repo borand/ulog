@@ -120,14 +120,47 @@ function connect_to_websocket_host(){
 // MAIN GUI - jQUERY
 //
 //
+
+var WebSocketConnection = function (host,url) {
+  console.log("WebSocketConnection")
+  this.debug  = 1;
+  this.host   = host;
+  this.ws_url = url;
+  this.websocket_address = "ws://" + this.host + "/websocket/" + this.ws_url;  
+  
+  try {
+    this.ws = new WebSocket(this.websocket_address);  
+    $('#live').text('CONNECTED');
+   } catch(e) {
+    console.log('WebSocket error: ' + e );        
+   }
+
+this.ws.onmessage = function(event){
+    console.log(event);
+    try {
+        JsonData = JSON.parse(event.data);
+    } 
+    catch(e) {
+        console.log('JSON.parse error: "' + e + '". JsonData = ' + event.data);     
+    }
+}
+
+this.ws.onclose = function(){
+    console.log("WebSocketConnection: connection closed to ");
+    $('#live').text('OFFLINE');
+}
+
+this.send = function(cmd){
+    if (this.ws.readyState == this.ws.OPEN){        
+        this.ws.send(JSON.stringify(cmd));
+    }
+}
+};
+
 $(document).ready(function() {
     dbg('Document ready', true);
-    connect_to_websocket_host();
-    
-    $('#example tfoot th').each( function () {
-        var title = $('#example thead th').eq( $(this).index() ).text();
-        $(this).html( '<input type="text" placeholder="'+title+'" />' );
-    } );
+    //connect_to_websocket_host();
+
 
     table = $('#example').DataTable({
         dom: 'C<"clear">lfrtip',
@@ -149,6 +182,11 @@ $(document).ready(function() {
     table.column( 7 ).visible( false );
     table.column( 8 ).visible( false );
     table.columns.adjust().draw( false );
+
+    // $('#example tfoot th').each( function () {
+    //     var title = $('#example thead th').eq( $(this).index() ).text();
+    //     $(this).html( '<input type="text" placeholder="'+title+'" />' );
+    // } );
 
     // Apply the search
     table.columns().every( function () {

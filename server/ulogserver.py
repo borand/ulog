@@ -1,4 +1,4 @@
-"""uLogger.py -
+"""ulogserver.py -
 
 Main webserver for ulogserver
 
@@ -56,6 +56,10 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):        
         self.render("main.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
 
+class TestHandler(tornado.web.RequestHandler):
+    def get(self):        
+        self.render("test.html")
+
 class CmdHandler(tornado.web.RequestHandler):
     def get(self):
         cmd  = self.get_argument("cmd", None)
@@ -80,7 +84,7 @@ class MessageHandler(tornado.websocket.WebSocketHandler):
     #    return parsed_origin.netloc.endswith(".mydomain.com")
 
     def open(self, chan):
-        # print("MessageHandler.open {0}".format(chan))
+        print("ulogserver.py:   MessageHandler.open(chan={0})".format(chan))
         self.sub_channel = chan
         self.listen()
 
@@ -108,13 +112,14 @@ class MessageHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         if self.client.subscribed:
-            self.client.unsubscribe(redis_pubsub_channel)
+            self.client.unsubscribe(self.sub_channel)
             self.client.disconnect()
 
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
                 (r'/', MainHandler),
+                (r'/test', TestHandler),
                 (r'/cmd/', CmdHandler),                
                 (r'/websocket/(?P<chan>.*)', MessageHandler),
                 ]

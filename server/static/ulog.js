@@ -159,14 +159,10 @@ this.send = function(cmd){
 
 $(document).ready(function() {
     dbg('Document ready', true);
-    //connect_to_websocket_host();
+    connect_to_websocket_host();
 
 
-    table = $('#example').DataTable({
-        dom: 'C<"clear">lfrtip',
-        "colVis": {
-            "buttonText": "Change columns"
-        },
+    window.table = $('#example').DataTable({
         "order": [[ 0, "desc" ]],
         "scrollY": "500px",
         "autoWidth": false,
@@ -179,9 +175,11 @@ $(document).ready(function() {
     // table.column( 0 ).visible( false );
     // table.column( 3 ).visible( false );
     // table.column( 4 ).visible( false );
-    table.column( 7 ).visible( false );
-    table.column( 8 ).visible( false );
-    table.columns.adjust().draw( false );
+    // table.column( 7 ).visible( false );
+    // table.column( 8 ).visible( false );
+    // table.columns.adjust().draw( false );
+
+    // console.log(table);
 
     // $('#example tfoot th').each( function () {
     //     var title = $('#example thead th').eq( $(this).index() ).text();
@@ -189,15 +187,15 @@ $(document).ready(function() {
     // } );
 
     // Apply the search
-    table.columns().every( function () {
-        var that = this;
+    // table.columns().every( function () {
+    //     var that = this;
  
-        $( 'input', this.footer() ).on( 'keyup change', function () {
-            that
-                .search( this.value )
-                .draw();
-        } );
-    } );
+    //     $( 'input', this.footer() ).on( 'keyup change', function () {
+    //         that
+    //             .search( this.value )
+    //             .draw();
+    //     } );
+    // } );
 
     $( "#button_clear" ).click(function() {
     table.clear().draw();

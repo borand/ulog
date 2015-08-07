@@ -5,7 +5,7 @@
   <title>uLogger</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <!-- jQuery -->
-  <script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.11.2.min.js"></script>
   <link rel="stylesheet" href="static/jquery.mobile-1.4.2.min.css" />
   <script src="static/jquery-2.1.1.min.js"></script>
   <script src="static/jquery.mobile-1.4.2.min.js"></script>
@@ -33,41 +33,11 @@
     </div>
     
     <div class="ui-body ui-body-a ui-corner-all">
-      <table id="example" class="display" cellspacing="0" width="100%">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Loger name</th>
-            <th>Level</th>
-            <th>Line #</th>
-            <th>Filename</th>
-            <th>Funcname</th>
-            <th>Msg</th>
-            <th>Hostname</th>                
-            <th>Username</th>
-          </tr>
-        </thead>
-
-        <tfoot>
-          <tr>
-            <th>Time</th>
-            <th>Loger name</th>
-            <th>Level</th>
-            <th>Line #</th>
-            <th>Filename</th>
-            <th>Funcname</th>
-            <th>Msg</th>
-            <th>Hostname</th>                
-            <th>Username</th>
-          </tr>
-        </tfoot>
+      <table id="example" class="display compact" cellspacing="0" width="100%">
       </table>
     </div>
 
     <div data-role="footer">...</div>
 
   </body>
-  <div id="hostname" value="{{host_ip}}"></div>
-  <div id="hostport" value="{{host_port}}"></div>
-  <div id="hosturl"  value="{{log_url}}"></div>
   </html>

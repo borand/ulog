@@ -116,7 +116,7 @@ class MessageHandler(tornado.websocket.WebSocketHandler):
         else:
             if msg.kind == 'message':
                 #log.debug(str(simplejson.loads(msg.body)))
-                self.write_message(simplejson.dumps(msg.body))                
+                self.write_message(msg.body)
             if msg.kind == 'disconnect':
                 # Do not try to reconnect, just send a message back
                 # to the client and close the client connection

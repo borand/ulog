@@ -1,56 +1,15 @@
 ///////////////////////////////////////////
 // Global variables
-var active_tab;
-var debug_websocket = false;
-var debug_js = true;
-var debug_all = true;
-var table;
 var ws;
+var table;
 var JsonData;   
+
 /////////////////////////////////////////////////////////////////////
 // UTILITY FUNCTIONS
 //
 function dbg(message, show) {   
-    show_server_msg(message, show); 
-}
-
-function SendCmd(cmd, val) {
-    return $.getJSON('/cmd/', "cmd=" + cmd + "&param=" + val, function(data) {          
-        $("#cmd_status").text(data.cmd);
-    });
-}
-
-function show_server_msg(message, show) {   
-    if (show)
-    {   
+    if (show){   
         console.log(message);        
-    }
-}
-
-function console_response_text(message, show) {
-    if(show){
-        dbg(message,true);
-    }
-}
-
-function set_object_value(id, val){
-    var datarole = $("#"+id).attr('data-role');
-    dbg('id:' + id + " data-role: " + datarole + "  val: " + val, true);
-    switch(datarole){
-        case 'slider':
-        dbg('case: slider', true);
-        $('#' + id).val(val).slider("refresh");
-        break;
-        case 'flipswitch':          
-        dbg('about to flip the switch value to:' + val + ' currently set to: ' + $('#' + id).val(), true);
-        $('#' + id).val(val).flipswitch("refresh");
-        break;
-        case 'text':
-        $('#' + id).text(val);
-        break
-        default:
-        dbg('case: default', true);
-        $('#' + id).val(val)[datarole]("refresh");
     }
 }
 
@@ -58,25 +17,20 @@ function set_object_value(id, val){
 // WEBSOCKETS FUNCTIONS
 //MessageHandler
 //
-function open_websocket(hostname, hostport, hosturl) {
-
+function open_websocket(hostname, hosturl) {
     dbg('Attempting to open web socket',true);
-    function show_message(message) {
-        show_server_msg(message);       
-    }
 
-    var websocket_address = "ws://" + hostname + ":" + hostport + "/websocket/" + hosturl;
+    var websocket_address = "ws://" + hostname + "/websocket/" + hosturl;
     ws = new WebSocket(websocket_address);
     
-    ws.onopen = function() {
-        //debug_websocket = $('#debug_websocket').prop("checked");
+    ws.onopen = function() {        
         dbg('web socket open', true);
         $('#live').text('CONNECTED');
         $("#live").css("background-color",'#B2BB1E');
     };
 
     ws.onmessage = function(event) {        
-        dbg('incomming message', true);
+        //dbg('incomming message', true);
         server_message_handler(event.data);
     };
     ws.onclose = function() {        
@@ -87,20 +41,27 @@ function open_websocket(hostname, hostport, hosturl) {
 }
 
 function server_message_handler(data){
-    
+    //dbg('server_message_handler() data = ' + data, true)    
     try {
+        
+        //TODO - not sure why I have to parse twice
         JsonData = JSON.parse(data);
-        table.row.add( [
-            JsonData.time,            
+        //console.log("JsonData = " + JsonData);
+        //console.log("JsonData.time = " + JsonData.time);
+        var timestamp = new Date(JsonData.time);          
+        var row_data = [
+            timestamp.toLocaleTimeString(),            
             JsonData.name,
             JsonData.level,
-            JsonData.line_no,
+            JsonData.line_no,            
+            JsonData.msg,
             JsonData.filename,
             JsonData.funcname,
-            JsonData.msg,
             JsonData.hostname,
             JsonData.username,
-            ] ).draw();
+            ];
+        //console.log("row_data = " + row_data);
+        table.row.add(row_data).draw();
 
     } catch(e) {
         dbg('JSON.parse error: "' + e + '". JsonData = ' + JsonData);
@@ -108,20 +69,32 @@ function server_message_handler(data){
     }
 }
 
-function connect_to_websocket_host(){
-    var hostname = $('#hostname').attr("value");
-    var hostport = $('#hostport').attr("value");
-    var hosturl  = $('#hosturl').attr("value");
-    dbg('connect_to_websocket_host(' + hostname +':' + hostport + '/' + 'websocket/' + hosturl, true);
-        open_websocket(hostname, hostport, hosturl);
-
-    }
 ///////////////////////////////////////////////////////////////////////
-// MAIN GUI - jQUERY
-//
-//
+// TABLE
+window.Table = function(canvasId){ // id of the "main" div as parameter
+    'use strict';
+    var mod = {}
+    mod.canvasId = canvasId;
+    mod.tables = [];
+    var main = function() {
+    // Cache it for speed (only ever need to query once)
+    if (main._elem)
+        return main._elem;
+    main._elem = document.getElementById(canvasId);
+    return main();
+    };   
 
-var WebSocketConnection = function (host,url) {
+    mod.draw = function(Opt){
+        mod.tables = $(mod.canvasId).DataTable({Opt});
+    };
+
+    return mod;
+};
+window.t = Table("#example");
+
+///////////////////////////////////////////////////////////////////////
+// WebSocketConnection Class
+window.WebSocketConnection = function (host,url) {
   console.log("WebSocketConnection")
   this.debug  = 1;
   this.host   = host;
@@ -134,11 +107,12 @@ var WebSocketConnection = function (host,url) {
    } catch(e) {
     console.log('WebSocket error: ' + e );        
    }
-
+'use strict';
 this.ws.onmessage = function(event){
     console.log(event);
     try {
-        JsonData = JSON.parse(event.data);
+        var JsonData = JSON.parse(event.data);
+        console.log(JsonData);
     } 
     catch(e) {
         console.log('JSON.parse error: "' + e + '". JsonData = ' + event.data);     
@@ -155,47 +129,43 @@ this.send = function(cmd){
         this.ws.send(JSON.stringify(cmd));
     }
 }
+return this;
 };
 
+var dataSet = [['12:00:00','self','1',144,"Test",'ulog.js',"var dataSet","localhost",'root'],];
+///////////////////////////////////////////////////////////////////////
+// MAIN GUI - jQUERY
+//
+//
 $(document).ready(function() {
     dbg('Document ready', true);
-    connect_to_websocket_host();
+    open_websocket(location.host, "log");
 
-
-    window.table = $('#example').DataTable({
+    table = $('#example').DataTable({
         "order": [[ 0, "desc" ]],
         "scrollY": "500px",
-        "autoWidth": false,
-        "paging": false,
-        "columnDefs": [
-             { "width": "75%", "targets": 6 }
+         "columns": [
+            { "title": "Time" },
+            { "title": "Loger" },
+            { "title": "Level" },
+            { "title": "Line#" },            
+            { "title": "Msg" },
+            { "title": "Filename" },
+            { "title": "Funcname" },
+            { "title": "Hostname" },
+            { "title": "Username" },
+        ],
+         "columnDefs": [
+             { "width": "2%", "targets": 2 },
+             { "width": "2%", "targets": 3 },
+             { "width": "60%", "targets": 4 }
              ]
-    } );
+    });
 
-    // table.column( 0 ).visible( false );
-    // table.column( 3 ).visible( false );
-    // table.column( 4 ).visible( false );
-    // table.column( 7 ).visible( false );
-    // table.column( 8 ).visible( false );
-    // table.columns.adjust().draw( false );
-
-    // console.log(table);
-
-    // $('#example tfoot th').each( function () {
-    //     var title = $('#example thead th').eq( $(this).index() ).text();
-    //     $(this).html( '<input type="text" placeholder="'+title+'" />' );
-    // } );
-
-    // Apply the search
-    // table.columns().every( function () {
-    //     var that = this;
- 
-    //     $( 'input', this.footer() ).on( 'keyup change', function () {
-    //         that
-    //             .search( this.value )
-    //             .draw();
-    //     } );
-    // } );
+    table.column( 6 ).visible( false );
+    table.column( 7 ).visible( false );
+    table.column( 8 ).visible( false );
+    table.columns.adjust().draw( false );
 
     $( "#button_clear" ).click(function() {
     table.clear().draw();

@@ -10,11 +10,11 @@ def print_msg(l):
 
 
 if __name__ == '__main__':
-	l.info("I like pie")
-	l.debug("I don't like to make pie")
-	l.error("Trousers! - the pie is killing me")
+	l.info("Test of info level")
+	#l.debug("I don't like to make pie")
+	#l.error("Trousers! - the pie is killing me")
 	
-	print_msg(l)
-	l.error("Trousers! - the pie is killing me")
+	#print_msg(l)
+	#l.error("Trousers! - the pie is killing me")
 
 

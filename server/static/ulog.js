@@ -73,21 +73,13 @@ function server_message_handler(data){
 // TABLE
 window.Table = function(canvasId){ // id of the "main" div as parameter
     'use strict';
-    var mod = {}
+    var mod = {};
     mod.canvasId = canvasId;
     mod.tables = [];
-    var main = function() {
-    // Cache it for speed (only ever need to query once)
-    if (main._elem)
-        return main._elem;
-    main._elem = document.getElementById(canvasId);
-    return main();
-    };   
-
+    
     mod.draw = function(Opt){
-        mod.tables = $(mod.canvasId).DataTable({Opt});
+        mod.tables = $(mod.canvasId).DataTable(Opt);
     };
-
     return mod;
 };
 window.t = Table("#example");
@@ -142,30 +134,28 @@ $(document).ready(function() {
     open_websocket(location.host, "log");
 
     table = $('#example').DataTable({
-        "order": [[ 0, "desc" ]],
-        "scrollY": "500px",
+        //"order": [[ 0, "desc" ]],
+        "paging":   false,        
+        "info":     true,
+        "scrollY": "600px",
+        "scrollX": true,
          "columns": [
             { "title": "Time" },
             { "title": "Loger" },
             { "title": "Level" },
             { "title": "Line#" },            
             { "title": "Msg" },
-            { "title": "Filename" },
-            { "title": "Funcname" },
-            { "title": "Hostname" },
-            { "title": "Username" },
+            { "title": "Filename", "visible": false },
+            { "title": "Funcname", "visible": false },
+            { "title": "Hostname", "visible": false  },
+            { "title": "Username", "visible": false  },
         ],
          "columnDefs": [
-             { "width": "2%", "targets": 2 },
+             { "width": "5%", "targets": 2 },
              { "width": "2%", "targets": 3 },
              { "width": "60%", "targets": 4 }
              ]
     });
-
-    table.column( 6 ).visible( false );
-    table.column( 7 ).visible( false );
-    table.column( 8 ).visible( false );
-    table.columns.adjust().draw( false );
 
     $( "#button_clear" ).click(function() {
     table.clear().draw();

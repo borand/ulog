@@ -66,21 +66,19 @@ def websocket_processing(msg):
         	R.publish(data['param']['chan'], data['param']['msg'])
     except:
     	pass
-        
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):        
         self.render("main.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
 
 class CmdHandler(tornado.web.RequestHandler):
-    def get(self):
-        cmd  = self.get_argument("cmd", None)
-        chan = self.get_argument("chan", None)
+    def get(self, msg):        
         #msg  = simplejson.dumps({'cmd' : cmd, 'chan' : chan, 'res' : 'OK'})
         #self.write('cmd= %s  para= %s' % (cmd, para))
-        #print('CmdHandler(%s)' % cmd)
-        #self.write(msg)
-        R.publish(chan + '-cmd',cmd)
+        #print('CmdHandler(%s)' % cmd)        
+        # self.write_message(msg)
+        self.write(msg)
+        R.publish('log',msg)
 
 class MessageHandler(tornado.websocket.WebSocketHandler):
     channel = 'comport'
@@ -134,7 +132,7 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
                 (r'/', MainHandler),
-                (r'/cmd/', CmdHandler),                
+                (r'/msg/(?P<msg>.*)', CmdHandler),                
                 (r'/websocket/(?P<chan>.*)', MessageHandler),
                 ]
         

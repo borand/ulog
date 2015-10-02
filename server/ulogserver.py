@@ -33,7 +33,7 @@ def get_host_ip():
     """
     parses ifconfig system command and returns host ip
     """
-    return '127.0.0.1'
+    return '0.0.0.0'
     # ip_exp = re.compile(r'(?:eth\d.*?inet addr\:)(\d{1,3}\.\d{1,3}.\d{1,3}.\d{1,3})',re.DOTALL)
     # ip_out = ip_exp.findall(sh.ifconfig().stdout)
     # if len(ip_out) > 0:

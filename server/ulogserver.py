@@ -48,7 +48,7 @@ def get_host_ip():
 log = logbook.Logger('ulogserver.py')
 redis_host_ip = get_host_ip()
 host_ip       = get_host_ip()
-host_port     = 8888;
+host_port     = 8001;
 log_url       = "log"
 
 R = Redis()
@@ -70,6 +70,12 @@ def websocket_processing(msg):
 class MainHandler(tornado.web.RequestHandler):
     def get(self):        
         self.render("main.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
+
+
+class TestHandler(tornado.web.RequestHandler):
+    def get(self):        
+        self.render("test.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
+
 
 class CmdHandler(tornado.web.RequestHandler):
     def get(self, msg):        
@@ -132,6 +138,7 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
                 (r'/', MainHandler),
+                (r'/test', TestHandler),
                 (r'/msg/(?P<msg>.*)', CmdHandler),                
                 (r'/websocket/(?P<chan>.*)', MessageHandler),
                 ]

@@ -1,0 +1,88 @@
+  <html lang="en">
+
+<head>
+  <meta charset="utf-8"/>
+  <title>uLogger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <!-- jQuery -->
+  <link rel="stylesheet" href="static/jquery.mobile-1.4.2.min.css" />
+  <script src="static/jquery-2.1.1.min.js"></script>
+  <script src="static/jquery.mobile-1.4.2.min.js"></script>
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="static/jquery.dataTables.css">
+  
+  <!-- DataTables -->
+  <script src="static/jquery.dataTables.js"></script>
+  <script src="static/test.js"></script>
+</head>
+
+<body>
+
+
+
+  <!-- ###################################################################################################### -->
+  <!-- Start of first page -->
+  <div data-role="page" id="main">
+  <div class="ui-grid-solo">
+<div data-role="header">
+      <div data-role="navbar">
+        <ul>
+            <li><a href="#">One</a></li>
+            <li><a href="#">Two</a></li>
+        </ul>
+    </div><!-- /navbar -->
+</div><!-- /header -->
+    <div role="main" class="ui-content"> 
+      <p><a href="#settings">Settings</a></p>     
+      <table id="example" class="display compact" cellspacing="0" width="100%"></table>
+    </div><!-- /content -->
+
+    <div data-role="footer"></div>
+  </div>
+  </div><!-- /page -->
+
+  <!-- ###################################################################################################### -->
+  <div data-role="page" id="settings">
+
+    <div role="main" class="ui-content">
+      <p><a href="#main">Back to foo</a></p> 
+
+      <li class="ui-field-contain">
+                    <label for="hostname">Hostname/ip
+                    <input type="text" name="hostname" id="hostname" value="{{host_ip}}" data-mini="true">
+                    </label>
+              </li>
+      <li class="ui-field-contain">
+                    <label for="port">Port
+                    <input type="text" name="port" id="hostport" value="{{host_port}}" data-mini="true">
+                    </label>
+              </li>
+      <li class="ui-field-contain">
+                    <label for="chan">Channel
+                    <input type="text" name="chan" id="hostchan" value="{{log_url}}" data-mini="true">
+                    </label>
+      </li>
+     
+    <button id="button_connect"    class="ui-btn ui-btn-inline">Connect</button>
+    <button id="button_disconnect" class="ui-btn ui-btn-inline">Disconnect</button>
+ 
+    <input type="checkbox" data-role="flipswitch" name="flip-checkbox-1" id="button_run_pause" data-on-text="Run" data-off-text="Pause" class="ui-btn ui-btn-inline" data-wrapper-class="custom-size-flipswitch">
+
+    <table id="logger_list" class="display" cellspacing="0" width="90%"></table>
+
+    <table id="filename" class="display" cellspacing="0" width="90%"></table>
+
+    <table id="username" class="display" cellspacing="0" width="90%"></table>
+
+    </div><!-- /content -->
+
+
+
+    <div data-role="footer">
+      <h4>Page Footer</h4>
+    </div><!-- /footer -->
+  </div><!-- /page -->
+  <!-- ###################################################################################################### -->
+</body>
+</html>

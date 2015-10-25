@@ -2,7 +2,9 @@
 // Global variables
 var ws;
 var table;
+var logger_list;
 var JsonData;
+var TableArray = [];
 
 /////////////////////////////////////////////////////////////////////
 // UTILITY FUNCTIONS
@@ -61,11 +63,32 @@ function server_message_handler(data){
             JsonData.username,
             ];
         //console.log("row_data = " + row_data);
+
+        //table.Rows.InsertAt(row_data, 0);
         table.row.add(row_data).draw();
 
+        add_to_table_if_doesnot_exist(TableArray[0], JsonData.name);
+        add_to_table_if_doesnot_exist(TableArray[1], JsonData.filename);
+        add_to_table_if_doesnot_exist(TableArray[2], JsonData.username);
+
+        //console.log(logger_list.columns().data()[0].indexOf(logger_name))
+        // if (logger_list.columns().data()[0].indexOf(logger_name) == -1)
+        // {
+        //     row_data = [logger_name, '<input type="checkbox" name="checkbox-0 data-mini="true" checked=true>'];
+        //     logger_list.row.add(row_data).draw();
+        // }
     } catch(e) {
         dbg('JSON.parse error: "' + e + '". JsonData = ' + JsonData);
         return;
+    }
+}
+
+function add_to_table_if_doesnot_exist(tablename, fieldname){
+    //console.log(tablename.columns().data()[0].indexOf(fieldname))
+    if (tablename.columns().data()[0].indexOf(fieldname) == -1)
+    {
+        row_data = [fieldname.trim(), '<input type="checkbox" name="checkbox-0" data-mini="true" checked=true>'];
+        tablename.row.add(row_data).draw();
     }
 }
 
@@ -157,12 +180,55 @@ $(document).ready(function() {
              ]
     });
 
-    $( "#button_clear" ).click(function() {
-    table.clear().draw();
+        //logger_list   = $('#logger_list').DataTable();
+    TableArray[0] = $('#logger_list').DataTable({
+                "info":     false,
+                "paging":   false,
+                "searching": false,
+                 "columns": [
+                { "title": "Logger" },
+                { "title": "Active" }
+            ],
+             "columnDefs": [
+            { "width": "80%", "targets": 0 },{ "width": "20%", "targets": 1 },
+            ]});
+    
+    TableArray[1] = $('#filename').DataTable({ 
+                "info":     false,
+                "paging":   false,
+                "searching": false,
+                 "columns": [
+                { "title": "Filename" },
+                { "title": "Active" }
+            ],
+                "columnDefs": [
+             { "width": "80%", "targets": 0 },{ "width": "20%", "targets": 1 },
+             ]});
+    
+    TableArray[2] = $('#username').DataTable({ 
+                "info":     false,
+                "paging":   false,
+                "searching": false,
+                "columns": [
+                { "title": "Username" },
+                { "title": "Active" }
+            ],
+                "columnDefs": [
+             { "width": "80%", "targets": 0 },{ "width": "20%", "targets": 1 },
+             ]});
+
+
+    $( "#button_connect" ).click(function() {
+        var hostname = $('#hostname').val();
+        var hostport = $('#hostport').val();
+        var hosturl  = $('#hostchan').val();
+        console.log('Pressed button: button_connect: [host, port] ' + hostname + ':' + hostport + '/websocket/'+ hosturl);
+        open_websocket(hostname + ":" + hostport, hosturl);
     });
 
-    $( "#button_run_stop" ).click(function() {
-    table.clear().draw();
+    $( "#button_disconnect").click(function() {
+        console.log('Closing websocket');
+        ws.close();
     });
 
     

@@ -87,7 +87,7 @@ function add_to_table_if_doesnot_exist(tablename, fieldname){
     //console.log(tablename.columns().data()[0].indexOf(fieldname))
     if (tablename.columns().data()[0].indexOf(fieldname) == -1)
     {
-        row_data = [fieldname.trim(), '<input type="checkbox" name="checkbox-0" data-mini="true" checked=true>'];
+        row_data = [fieldname.trim(), '<input type="checkbox" data-role="flipswitch" checked=true class="activate_box">'];
         tablename.row.add(row_data).draw();
     }
 }
@@ -230,6 +230,27 @@ $(document).ready(function() {
         console.log('Closing websocket');
         ws.close();
     });
+
+    $("#button_run_pause").click(function() {
+        console.log('on_click')
+    alert("Checkbox state (method 1) = " + $(this).prop('checked'));
+    alert("Checkbox state (method 2) = " + $(this).is(':checked'));
+    });
+
+     $("input[type=checkbox]").change(function(){
+        if($(this).is(":checked")){
+            alert("Checked");
+             //$(this).siblings("input[type=checkbox]").removeAttr("checked");
+           }else{
+            alert("Unchecked")  
+           }
+        });
+
+    $('#logger_list tbody').on('click', 'tr', function () {
+        var data = TableArray[0].row( this ).data();
+        console.log(data[0]);
+        //alert( 'You clicked on '+data +'\'s row' );
+    } );
 
     
 });

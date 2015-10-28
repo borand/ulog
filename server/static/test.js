@@ -237,18 +237,18 @@ $(document).ready(function() {
     alert("Checkbox state (method 2) = " + $(this).is(':checked'));
     });
 
-     $("input[type=checkbox]").change(function(){
-        if($(this).is(":checked")){
-            alert("Checked");
-             //$(this).siblings("input[type=checkbox]").removeAttr("checked");
-           }else{
-            alert("Unchecked")  
-           }
+    // FROM http://demos.jquerymobile.com/1.3.2/examples/controlgroups/dynamic-controlgroup.html#&ui-state=dialog
+    var counter = 0;
+     $("#my-controlgroup").on( "click", function() {
+        $el = $( "<label for='widget" + counter + "'>Checkbox " + counter + "</label><input type='checkbox' id='widget" + counter + "'></input>" );
+        $( "#my-controlgroup" ).controlgroup( "container" )[ $( this ).attr( "id" ) ]( $el );
+        $( $el[ 1 ] ).checkboxradio();
         });
-
+    
     $('#logger_list tbody').on('click', 'tr', function () {
         var data = TableArray[0].row( this ).data();
         console.log(data[0]);
+        
         //alert( 'You clicked on '+data +'\'s row' );
     } );
 

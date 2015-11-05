@@ -1,6 +1,10 @@
+import random
+from time import sleep
 from redislog import handlers, logger
 l = logger.RedisLogger('loger_test')
-l.addHandler(handlers.RedisHandler.to("log", host='localhost', port=6379))
+l.addHandler(handlers.RedisHandler.to("log", host='192.168.1.12', port=6379))
+
+msg_list = ['asdfasdf','randmom message', 'asdf 123123 asdf', "More randmom messages, this one is a full sentenc","123 234 456 567 123",'ALL CAPS THIS COULD BE BAD']
 
 def print_msg(l):
 	try:
@@ -9,12 +13,20 @@ def print_msg(l):
 		print("Error message")
 
 
+
 if __name__ == '__main__':
-	l.info("I like pie")
-	l.debug("I don't like to make pie")
-	l.error("Trousers! - the pie is killing me")
-	
-	print_msg(l)
-	l.error("Trousers! - the pie is killing me")
+	num_of_msgs = len(msg_list) - 1
+	while 1:		
+		ix = random.randint(0,num_of_msgs)
+		l.info(msg_list[ix])
+		sleep(1)
 
 
+		ix = random.randint(0,num_of_msgs)
+		l.debug(msg_list[ix])
+		sleep(1)
+
+
+		ix = random.randint(0,num_of_msgs)
+		l.error(msg_list[ix])
+		sleep(1)

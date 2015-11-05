@@ -1,15 +1,18 @@
 ///////////////////////////////////////////
 // Global variables
-var ws;
 var table;
 var JsonData;
+//var JsonData = {"time": "04-Nov-2015 16:01:33","name": "test_a","level": 1,"line_no": 0,"filename": "none","funcname": "none","msg": "Test","hostname": "onw-aborowie-01","username": "aborowie"};
 
 /////////////////////////////////////////////////////////////////////
 // UTILITY FUNCTIONS
 //
-function dbg(message, show) {   
-    if (show){   
-        console.log(message);        
+/////////////////////////////////////////////////////////////////////
+// UTILITY FUNCTIONS
+//
+function dbg(message, show) {
+    if (show){
+        console.log(message);
     }
 }
 
@@ -17,153 +20,178 @@ function dbg(message, show) {
 // WEBSOCKETS FUNCTIONS
 //MessageHandler
 //
+function slugify(text)
+{
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
+}
+
+function is_log_active(JsonData, fieldname){
+    var tmp = [];
+    var x = $("input[name='cb_"+fieldname+"']");
+    var sn = "cb_" + slugify(JsonData[fieldname]);
+    if (x.length){
+        //$("input[name='cbcb_filename']").each(function() {if($(this).is(":checked")){tmp.push($(this).attr('id'));}});        
+        x.each(function() {if($(this).is(":checked")){tmp.push($(this).attr('id'));}});        
+        return tmp.indexOf(sn) > -1;
+    }
+    else{
+        return true
+    };
+};
+
+function console_response_msg(message, show) {
+    if(show){
+        dbg(message);        
+        $("#ws_console").html($("#ws_console").text() + message + '\n');
+        var psconsole = $('#ws_console');
+        psconsole.scrollTop(psconsole[0].scrollHeight - psconsole.height());
+    }
+};
+
 function open_websocket(hostname, hosturl) {
     dbg('Attempting to open web socket',true);
 
     var websocket_address = "ws://" + hostname + "/websocket/" + hosturl;
     ws = new WebSocket(websocket_address);
-    
-    ws.onopen = function() {        
+
+    ws.onopen = function() {
         dbg('web socket open', true);
         $('#live').text('CONNECTED');
         $("#live").css("background-color",'#B2BB1E');
     };
 
-    ws.onmessage = function(event) {        
+    ws.onmessage = function(event) {
         //dbg('incomming message', true);
         server_message_handler(event.data);
     };
-    ws.onclose = function() {        
+    ws.onclose = function() {
         dbg('closing websockets', true);
         $('#live').text('OFFLINE');
         $("#live").css("background-color",'#FF0000');
     };
 }
 
+function add_to_table_if_does_not_exist(Obj, fieldname){
+    //console.log(fieldname)    
+    var sn = "cb_" + slugify(Obj[fieldname]);
+    var table_id = 'cb_' + fieldname; 
+    //console.log("fieldname= " + fieldname + " sn = " + sn)
+    if (($("#"+sn).length) == 0)
+    {
+        $("#"+table_id).append('<input type="checkbox" data-mini="true" checked=true name="' + table_id +'" id="'+sn+'"><label for="'+sn+'">'+Obj[fieldname]+'</label>').trigger('create');
+    }
+}
+
 function server_message_handler(data){
-    //dbg('server_message_handler() data = ' + data, true)    
+    //dbg('server_message_handler() data = ' + data, true)
     try {
-        
-        //TODO - not sure why I have to parse twice
+
+        if($("#flip_show_raw").val() === 'on'){
+            console_response_msg(data, true);
+        };
         JsonData = JSON.parse(data);
         //console.log("JsonData = " + JsonData);
         //console.log("JsonData.time = " + JsonData.time);
-        var timestamp = new Date(JsonData.time);          
+        //var x = $("input[name='cbcb_filename']");
+
+
+        var timestamp = new Date(JsonData.time);
+        // Convert level to numerical value
+        // We redefine python key value to our own standard, the higher the number the more debug info
+        var level_py = {"CRITICAL":0, "ERROR":0,"WARNING":1,"INFO":1,"DEBUG":3}
+        if (typeof JsonData.level === 'string' || JsonData.level instanceof String){
+             JsonData.level = level_py[JsonData.level.toUpperCase()];
+        };
+
         var row_data = [
-            timestamp.toLocaleTimeString(),            
+            timestamp.toLocaleTimeString(),
             JsonData.name,
             JsonData.level,
-            JsonData.line_no,            
-            JsonData.msg,
+            JsonData.line_no,
             JsonData.filename,
             JsonData.funcname,
             JsonData.hostname,
             JsonData.username,
+            JsonData.msg,
             ];
-        //console.log("row_data = " + row_data);
-        table.row.add(row_data).draw();
+
+
+
+        add_to_table_if_does_not_exist(JsonData,'name');
+        add_to_table_if_does_not_exist(JsonData,'hostname');
+        add_to_table_if_does_not_exist(JsonData,'username');
+        add_to_table_if_does_not_exist(JsonData,'filename');
+
+        //table.row.add(row_data).draw();
+        
+        if (is_log_active(JsonData,'name')     && is_log_active(JsonData,'hostname') &&
+            is_log_active(JsonData,'username') && is_log_active(JsonData,'filename') &&
+            parseInt($("#max_log_level").val()) >= JsonData.level){
+             table.row.add(row_data).draw();
+        };
+        
 
     } catch(e) {
         dbg('JSON.parse error: "' + e + '". JsonData = ' + JsonData);
+        console_response_msg(JsonData, true);
         return;
     }
 }
 
-///////////////////////////////////////////////////////////////////////
-// TABLE
-window.Table = function(canvasId){ // id of the "main" div as parameter
-    'use strict';
-    var mod = {};
-    mod.canvasId = canvasId;
-    mod.tables = [];
-    
-    mod.draw = function(Opt){
-        mod.tables = $(mod.canvasId).DataTable(Opt);
-    };
-    return mod;
-};
-window.t = Table("#example");
-
-///////////////////////////////////////////////////////////////////////
-// WebSocketConnection Class
-window.WebSocketConnection = function (host,url) {
-  console.log("WebSocketConnection")
-  this.debug  = 1;
-  this.host   = host;
-  this.ws_url = url;
-  this.websocket_address = "ws://" + this.host + "/websocket/" + this.ws_url;  
-  
-  try {
-    this.ws = new WebSocket(this.websocket_address);  
-    $('#live').text('CONNECTED');
-   } catch(e) {
-    console.log('WebSocket error: ' + e );        
-   }
-'use strict';
-this.ws.onmessage = function(event){
-    console.log(event);
-    try {
-        var JsonData = JSON.parse(event.data);
-        console.log(JsonData);
-    } 
-    catch(e) {
-        console.log('JSON.parse error: "' + e + '". JsonData = ' + event.data);     
-    }
+function connect_to_websocket_host(){
+    var hostname = $('#hostname').val();
+    var hostport = $('#hostport').val();
+    var hosturl  = $('#hosturl').val();
+    dbg('Pressed button: button_connect: [host, port] ' + hostname +':' + hostport + '/websocket/'+ hosturl, true);
+    open_websocket(hostname+':'+hostport, hosturl);
 }
-
-this.ws.onclose = function(){
-    console.log("WebSocketConnection: connection closed to ");
-    $('#live').text('OFFLINE');
-}
-
-this.send = function(cmd){
-    if (this.ws.readyState == this.ws.OPEN){        
-        this.ws.send(JSON.stringify(cmd));
-    }
-}
-return this;
-};
-
-var dataSet = [['12:00:00','self','1',144,"Test",'ulog.js',"var dataSet","localhost",'root'],];
-///////////////////////////////////////////////////////////////////////
-// MAIN GUI - jQUERY
-//
-//
 $(document).ready(function() {
-    dbg('Document ready', true);
-    open_websocket(location.host, "log");
-
-    table = $('#example').DataTable({
-        //"order": [[ 0, "desc" ]],
-        "paging":   false,        
-        "info":     true,
-        "scrollY": "600px",
-        "scrollX": true,
-         "columns": [
-            { "title": "Time" },
-            { "title": "Loger" },
-            { "title": "Level" },
-            { "title": "Line#" },            
-            { "title": "Msg" },
-            { "title": "Filename", "visible": false },
-            { "title": "Funcname", "visible": false },
-            { "title": "Hostname", "visible": false  },
-            { "title": "Username", "visible": false  },
-        ],
-         "columnDefs": [
-             { "width": "5%", "targets": 2 },
-             { "width": "2%", "targets": 3 },
-             { "width": "60%", "targets": 4 }
-             ]
-    });
-
-    $( "#button_clear" ).click(function() {
-    table.clear().draw();
-    });
-
-    $( "#button_run_stop" ).click(function() {
-    table.clear().draw();
-    });
-
     
+    connect_to_websocket_host();
+    table = $('#example').DataTable({
+        "order": [[ 0, "desc" ]],
+        "dom": '<"top"if>t<"bottom"lp><"clear">',
+        "paging":   false,
+        "info":     true,        
+        "scrollY": "600px",
+        "bInfo": false,
+        "scrollX": true,        
+         "columns": [
+            { "title": "Time"    ,"width":"10%" },
+            { "title": "Loger"   ,"width":"10%" },
+            { "title": "Level"   ,"width":"5%"  },
+            { "title": "Line#"   ,"width":"5%"  },
+            { "title": "Filename","width":"10%", "visible": false },
+            { "title": "Funcname","width":"10%", "visible": false },
+            { "title": "Hostname","width":"10%", "visible": false  },
+            { "title": "Username","width":"10%", "visible": false  },
+            { "title": "Msg" }
+        ]
+    });
+
+    $('a.toggle-vis').on( 'click', function (e) {
+        console.log(this);
+        e.preventDefault();
+ 
+        // Get the column API object
+        var column = table.column( $(this).attr('data-column') );
+ 
+        // Toggle the visibility
+        column.visible( ! column.visible() );
+        table.columns.adjust().draw();
+    } );
+
+    $("#button_connect").click(function() {  connect_to_websocket_host();   });
+    
+    // http://jsfiddle.net/KPkJn/9/    
+    $( "#button_test" ).click(function() {/* */});
+
+    $( "#button_clear" ).click(function(){ table.clear().draw(); });
+    $( "#button_clear_console" ).click(function(){ $("#ws_console").html("");});
+
 });

@@ -2,7 +2,7 @@ import random
 from time import sleep
 from redislog import handlers, logger
 l = logger.RedisLogger('loger_test')
-l.addHandler(handlers.RedisHandler.to("log", host='localhost', port=6379))
+l.addHandler(handlers.RedisHandler.to("log", host='192.168.1.12', port=6379))
 
 msg_list = ['asdfasdf','randmom message', 'asdf 123123 asdf', "More randmom messages, this one is a full sentenc","123 234 456 567 123",'ALL CAPS THIS COULD BE BAD']
 

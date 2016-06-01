@@ -71,11 +71,9 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):        
         self.render("main.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
 
-
 class TestHandler(tornado.web.RequestHandler):
     def get(self):        
         self.render("test.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
-
 
 class CmdHandler(tornado.web.RequestHandler):
     def get(self, msg):        
@@ -83,7 +81,6 @@ class CmdHandler(tornado.web.RequestHandler):
         #self.write('cmd= %s  para= %s' % (cmd, para))
         #print('CmdHandler(%s)' % cmd)        
         # self.write_message(msg)
-        self.write(msg)
         R.publish('log',msg)
 
 class MessageHandler(tornado.websocket.WebSocketHandler):

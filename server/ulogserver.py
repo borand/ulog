@@ -75,13 +75,22 @@ class TestHandler(tornado.web.RequestHandler):
     def get(self):        
         self.render("test.html", title="uLog", host_ip=host_ip, host_port=host_port, log_url=log_url)
 
-class CmdHandler(tornado.web.RequestHandler):
+class MsgHandler(tornado.web.RequestHandler):
     def get(self, msg):        
         #msg  = simplejson.dumps({'cmd' : cmd, 'chan' : chan, 'res' : 'OK'})
         #self.write('cmd= %s  para= %s' % (cmd, para))
-        #print('CmdHandler(%s)' % cmd)        
-        # self.write_message(msg)
-        R.publish('log',msg)
+        #print('MsgHandler(%s)' % cmd)
+        R.publish(log_url,msg)
+        res = dict()
+        res['raw'] = msg
+        try:            
+            out = simplejson.loads(msg)
+            res['json'] = True            
+        except:
+            res['json'] = False
+            
+        msg = simplejson.dumps(res)
+        self.write(msg)
 
 class MessageHandler(tornado.websocket.WebSocketHandler):
     channel = 'comport'
@@ -136,7 +145,7 @@ class Application(tornado.web.Application):
         handlers = [
                 (r'/', MainHandler),
                 (r'/test', TestHandler),
-                (r'/msg/(?P<msg>.*)', CmdHandler),                
+                (r'/msg/(?P<msg>.*)', MsgHandler),                
                 (r'/websocket/(?P<chan>.*)', MessageHandler),
                 ]
         
